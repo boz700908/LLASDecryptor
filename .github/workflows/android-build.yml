@@ -1,40 +1,28 @@
-name: Android CI
+name: .NET Build & Test
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main
+ ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+    runs-on: windows-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-
-      - name: Install dependencies
-        run: sudo apt-get install -y lib32z1 lib32ncurses6 libbz2-1.0:i386
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v2
-        with:
-          api-level: 30
-          build-tools: 30.0.3
-
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release.apk
-          path: app/build/outputs/apk/release/app-release.apk
+      - name: Setup
+        uses: actions/setup-dotnet@v4
+      - name: Build
+        run: dotnet build --configuration $env:Configuration
+        env:
+          Configuration: ${{ matrix.configuration }}
+      - name: Test
+        run: dotnet test --configuration $env:Configuration
+        env:
+          Configuration: ${{ matrix.configuration }}
