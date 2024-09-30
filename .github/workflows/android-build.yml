@@ -19,7 +19,7 @@ jobs:
       - name: Setup
         uses: actions/setup-dotnet@v4
       - name: Build
-        run: dotnet build --configuration $env:Config -t:InstallAndroidDependencies -f net8.0-android -p:AndroidSdkDirectory=c:\work\android-sdk -p:JavaSdkDirectory=c:\work\jdk -p:AcceptAndroidSdkLicenses=True
+        run: dotnet build --configuration $env:Config -t:InstallAndroidDependencies -f net6.0-android -p:AndroidSdkDirectory=c:\work\android-sdk -p:JavaSdkDirectory=c:\work\jdk -p:AcceptAndroidSdkLicenses=True -p:android="Any arm64"
         env:
           Configuration: ${{ matrix.configuration }}
       - name: Test
