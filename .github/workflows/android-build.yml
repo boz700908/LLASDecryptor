@@ -1,28 +1,40 @@
-name: .NET Build & Test
+name: Build and Release Android APK
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main
- ]
+    branches:
+      - main
 
 jobs:
   build:
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup
-        uses: actions/setup-dotnet@v4
-      - name: Build
-        run: dotnet build --configuration $env:Config -t:InstallAndroidDependencies -f net6.0-android -p:AndroidSdkDirectory=c:\work\android-sdk -p:JavaSdkDirectory=c:\work\jdk -p:AcceptAndroidSdkLicenses=True -p:android="Any arm64"
-        env:
-          Configuration: ${{ matrix.configuration }}
-      - name: Test
-        run: dotnet test --configuration $env:Configuration
-        env:
-          Configuration: ${{ matrix.configuration }}
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
+      with:
+        api-level: 30
+        build-tools: 30.0.3
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build project
+      run: dotnet build --configuration Release
+
+    - name: Publish APK
+      run: |
+        mkdir -p output
+        dotnet publish -c Release -o output
+        cp output/*.apk ${{ github.workspace }}
